@@ -1,0 +1,24 @@
+{
+  "name": "onlineoffline",
+  "homepage": "https://github.com/catalpainternational/onlineoffline",
+  "authors": [
+    "Catalpa International <info@catalpa.io>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "riot": "^2.4.0",
+    "jquery": "^2.2.3",
+    "bootstrap": "^3.3.6"
+  }
+}
