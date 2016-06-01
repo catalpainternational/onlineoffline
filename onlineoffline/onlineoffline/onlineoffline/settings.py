@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['127.0.0.1', ]
 # Application definition
 
 INSTALLED_APPS = [
+    'contactlist',
     'example_app',
     'rest_framework',
     'django.contrib.admin',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'django.contrib.gis',
 
     # 3rd Party
     'rosetta',
