@@ -10,7 +10,7 @@
         <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
         <script src="{% static 'js/Lawnchair.js' %}"></script>
         <script src="{% static 'js/adapters/indexed-db.js' %}"></script>
-{#        <script src="{% static 'js/ajaxsubmit.js' %}"></script>#}
+        <!--<script src="{% static 'js/ajaxsubmit.js' %}"></script>-->
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
@@ -28,23 +28,29 @@
         <script type="riot/tag">
             {% include 'contactlist/person.tag.html' %}
         </script>
-        {% include 'contactlist/event.tag.html' %}
-        {% include 'contactlist/personevent.tag.html' %}
+
+        <script type="riot/tag">
+            {% include 'contactlist/event.tag.html' %}
+        </script>
+
+        <script type="riot/tag">
+            {% include 'contactlist/personevent.tag.html' %}
+        </script>
+
         <script>
-            // initial persons come from Django template tag
-            var persons = {{ persons|safe }}
+            // initial persons can come from Django template tag
+            // var persons = {{ persons|safe }}
+            var persons = []
+            // Or they can be loaded with a call to RiotControl.trigger('reload_from_server')
             var events = {{ events|safe }}
             var personevents = {{ personevents|safe }}
-
-            // Create a store instance.
-            var personStore = new PersonStore(persons)
+            var personStore = new PersonStore([])
 
             // Register the store in central dispatch and mount.
             RiotControl.addStore(personStore)
+            RiotControl.trigger('reload_from_server')
+            riot.mount('person');
 
-            riot.mount('person')
-            riot.mount('event')
-            riot.mount('personevent')
         </script>
     </body>
 </html>

@@ -2,12 +2,25 @@
 {% load crispy_forms_tags %}
 {#  Provides a RiotJS tag to view, add, edit persons #}
 <person>
-    <div class="col col-lg-4">
+    <div class="col col-lg-12">
         <h3>{ message } <label class='badge'>{ persons.length }</label></h3>
         <button onclick={ reload_from_server } class="btn btn-sm btn-primary">From Server</button>
         <button onclick={ save_to_local } class="btn btn-sm btn-primary">To Local</button>
         <button onclick={ from_local } class="btn btn-sm btn-primary">From Local</button>
         <ul>
+
+            <li id="info">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3> DRF and RiotJS Integration Example</h3>
+
+                        <p>A brief example in using riotjs to add, edit and delete model instances</p>
+                        <p>Also includes Lawnchair storage: shelve or retrieve the current RiotJS objects in the store</p>
+
+                    </div>
+                </div>
+            </li>
+
             <li id="add_person_panel">
                 <div class="panel panel-default">
                     <div class="panel-body">
