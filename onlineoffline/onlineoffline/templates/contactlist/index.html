@@ -1,4 +1,5 @@
 {% load staticfiles %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -7,33 +8,43 @@
         <script src="{% static 'js/personstore.js' %}"></script>
         <!--script src="{% static 'js/bootstrap.min.js' %}"></script-->
         <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+        <script src="{% static 'js/Lawnchair.js' %}"></script>
+        <script src="{% static 'js/adapters/indexed-db.js' %}"></script>
+{#        <script src="{% static 'js/ajaxsubmit.js' %}"></script>#}
+
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
     </head>
     <body>
         <div class='container'>
             <div class='row'>
-{#                <div class="col col-lg-4">#}
                     <person></person>
-{#                </div>#}
+                    <event></event>
+                    <personevent></personevent>
             </div>
 
         </div>
 
-
         <script type="riot/tag">
-            {% include 'contactlist/person.tag' %}
+            {% include 'contactlist/person.tag.html' %}
         </script>
+        {% include 'contactlist/event.tag.html' %}
+        {% include 'contactlist/personevent.tag.html' %}
         <script>
             // initial persons come from Django template tag
             var persons = {{ persons|safe }}
+            var events = {{ events|safe }}
+            var personevents = {{ personevents|safe }}
 
             // Create a store instance.
             var personStore = new PersonStore(persons)
 
             // Register the store in central dispatch and mount.
             RiotControl.addStore(personStore)
+
             riot.mount('person')
+            riot.mount('event')
+            riot.mount('personevent')
         </script>
     </body>
 </html>

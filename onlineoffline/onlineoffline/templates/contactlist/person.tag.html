@@ -1,0 +1,130 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+{#  Provides a RiotJS tag to view, add, edit persons #}
+<person>
+    <div class="col col-lg-4">
+        <h3>{ message } <label class='badge'>{ persons.length }</label></h3>
+        <button onclick={ reload_from_server } class="btn btn-sm btn-primary">From Server</button>
+        <button onclick={ save_to_local } class="btn btn-sm btn-primary">To Local</button>
+        <button onclick={ from_local } class="btn btn-sm btn-primary">From Local</button>
+        <ul>
+            <li id="add_person_panel">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3> Add a person</h3>
+                        {% crispy forms.person_add %}
+
+                    </div>
+                </div>
+            </li>
+
+            <li id="edit_person_panel">
+                <div class="panel panel-default">
+                    <div class="panel-body"  id="personedit">
+                        <h3> Edit a person</h3>
+                        {% crispy forms.person_edit %}
+                    </div>
+                </div>
+            </li>
+
+            <li class="person" each={ persons }>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4> { person }</h4>
+                        <p>id { id }</p>
+                        <p>E { email }</p>
+                        <p>P { phone }</p>
+                        <form onsubmit={ parent.remove } method="DELETE" action="/contactlist/api/person/{ id }/">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-warning">Remove</button>
+                        </form>
+                        <button onclick={ parent.edit_item } class="btn btn-sm btn-primary">Edit</button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <style scoped>
+        :scope { font-size: 2rem }
+        h3 { color: #444 }
+        ul { font-size: 1rem }
+        li { list-style-type: none }
+
+        .panel.panel-default:hover {
+            border-color:red;
+        }
+
+        .person.edit .panel.panel-default {
+            border-color:green;
+        }
+
+    </style>
+
+{#    <script>#}
+
+    var self = this
+    self.message = 'Persons'
+
+    self.on('mount', function() {
+        self.person_edit_hide()
+        RiotControl.trigger('person_init')
+    })
+
+    // Register a listener for store change events.
+    RiotControl.on('persons_changed', function(persons) {
+        self.person_edit_hide()
+        self.persons = persons
+        console.log(self.persons)
+        self.update()
+    })
+
+    edit_item(e) {
+        self.person_edit_show()
+        console.log('edit')
+        self.edit = e.item
+        console.log(e.item)
+        $('li.person').removeClass('edit')
+        $(e.target).parents('li.person:first').addClass('edit')
+        self.update()
+    }
+
+    submit_edit(e) {
+        e.preventDefault()
+        RiotControl.trigger('person_edit', e, self.edit)
+    }
+
+    add(e) {
+        e.preventDefault()
+        form = $(e.currentTarget)
+        var obj = {};
+        $.map(form.find('input, textarea, option').not('[name=csrfmiddlewaretoken]'), function(n, i)
+        {
+            obj[n.name] = $(n).val();
+        });
+        RiotControl.trigger('person_add', obj)
+        //form.resetForm()
+    }
+
+    remove(e) {
+        e.preventDefault()
+        console.log(e)
+        RiotControl.trigger('person_remove', e)
+    }
+
+    reload_from_server(e) {RiotControl.trigger('reload_from_server')}
+    save_to_local(e) {RiotControl.trigger('save_to_local')}
+    from_local(e) {RiotControl.trigger('from_local')}
+
+    person_edit_hide() {self.edit = {};$(self.edit_person_panel).hide();$(self.add_person_panel).show()}
+    person_edit_show() {$(self.edit_person_panel).show();$(self.add_person_panel).hide()}
+    RiotControl.on('person_edit_hide', function() {person_edit_hide})
+    RiotControl.on('person_edit_show', function() {person_edit_show})
+    
+    person_add_hide() {$(self.add_person_panel).hide();$(self.edit_person_panel).show()}
+    person_add_show() {$(self.add_person_panel).show();$(self.edit_person_panel).hide()}
+    RiotControl.on('person_add_hide', function() {person_add_hide})
+    RiotControl.on('person_add_show', function() {person_add_show})
+
+
+{#    </script>#}
+</person>
