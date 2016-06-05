@@ -6,6 +6,7 @@
         <script src="{% static 'js/riot+compiler.min.js' %}"></script>
         <script src="{% static 'js/riotcontrol.js' %}"></script>
         <script src="{% static 'js/personstore.js' %}"></script>
+        <script src="{% static 'js/requeststore.js' %}"></script>
         <!--script src="{% static 'js/bootstrap.min.js' %}"></script-->
         <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
         <script src="{% static 'js/Lawnchair.js' %}"></script>
@@ -21,6 +22,7 @@
                     <person></person>
                     <event></event>
                     <personevent></personevent>
+                    <request></request>
             </div>
 
         </div>
@@ -37,6 +39,11 @@
             {% include 'contactlist/personevent.tag.html' %}
         </script>
 
+        <script type="riot/tag">
+            {% include 'contactlist/request.tag.html' %}
+        </script>
+
+
         <script>
             // initial persons can come from Django template tag
             // var persons = {{ persons|safe }}
@@ -45,11 +52,14 @@
             var events = {{ events|safe }}
             var personevents = {{ personevents|safe }}
             var personStore = new PersonStore([])
+            var requestStore = new RequestStore()
 
             // Register the store in central dispatch and mount.
             RiotControl.addStore(personStore)
+            RiotControl.addStore(requestStore)
             RiotControl.trigger('reload_from_server')
             riot.mount('person');
+            riot.mount('request');
 
         </script>
     </body>

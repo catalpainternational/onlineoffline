@@ -1,0 +1,85 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+{#  Provides a RiotJS tag to view requests #}
+<request>
+    <div class="col col-lg-6">
+        <h3>{ message } <label class='badge'>{ requests.length }</label></h3>
+        <button onclick={ shelve_requests } class="btn btn-sm btn-primary">To Local</button>
+        <button onclick={ unshelve_requests } class="btn btn-sm btn-primary">From Local</button>
+        <ul>
+
+            <li id="info">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h3> Request Monitoring</h3>
+
+                        <p>Keeps a record of the requests which have been made, and the result.</p>
+                        <p>If a request cannot be responded to by the server it can be shelved in local storage</p>
+
+                    </div>
+                </div>
+            </li>
+
+            <li class="request" each={ requests }>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p> { url }</p>
+                        <p> { method }</p>
+                        <p> { data }</p>
+                        <p> { status }</p>
+                        <p> { done }</p>
+                        <button onclick={ parent.request_do } class="btn btn-sm btn-primary">Make request</button>
+                    </div>
+                </div>
+
+            </li>
+        </ul>
+    </div>
+    <style scoped>
+        :scope { font-size: 2rem }
+        h3 { color: #444 }
+        ul { font-size: 1rem }
+        li { list-style-type: none }
+
+        .panel.panel-default:hover {
+            border-color:red;
+        }
+
+        .person.edit .panel.panel-default {
+            border-color:green;
+        }
+
+    </style>
+
+{#    <script>#}
+
+    var self = this
+    self.message = 'Requests'
+
+    self.on('mount', function() {
+        RiotControl.trigger('requests_init')
+        self.update()
+    });
+
+    RiotControl.on('requests_changed', function(requests) {
+        self.requests = requests
+        console.log(self.requests)
+        self.update()
+    })
+
+    RiotControl.on('request_add',function(){
+        console.log(self.requests);
+        self.update()
+    })
+
+    request_do(e){
+        console.log(e)
+        console.log(e.item)
+        RiotControl.trigger('request_do', e.item)}
+
+    shelve_requests(e){RiotControl.trigger('shelve_requests')}
+
+    unshelve_requests(e){RiotControl.trigger('unshelve_requests')}
+
+{#    </script>#}
+</request>

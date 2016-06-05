@@ -2,10 +2,10 @@
 {% load crispy_forms_tags %}
 {#  Provides a RiotJS tag to view, add, edit persons #}
 <person>
-    <div class="col col-lg-12">
+    <div class="col col-lg-6">
         <h3>{ message } <label class='badge'>{ persons.length }</label></h3>
         <button onclick={ reload_from_server } class="btn btn-sm btn-primary">From Server</button>
-        <button onclick={ save_to_local } class="btn btn-sm btn-primary">To Local</button>
+        <button onclick={ requests } class="btn btn-sm btn-primary">To Local</button>
         <button onclick={ from_local } class="btn btn-sm btn-primary">From Local</button>
         <ul>
 
@@ -114,7 +114,7 @@
         {
             obj[n.name] = $(n).val();
         });
-        RiotControl.trigger('person_add', obj)
+        RiotControl.trigger('person_add', JSON.stringify(obj))
         //form.resetForm()
     }
 
