@@ -40,7 +40,7 @@ function RequestStore() {
     });
 
     self.on('request_add', function (request) {
-        self.requests.push({'url':request.url, 'method':request.method, 'data':request.data, 'status':'waiting', 'done':request.done});
+        self.requests.push({'url':request.url, 'method':request.method, 'data':request.data, 'status':'waiting', 'done':request.done, 'appName':request.appName, 'modelName':request.modelName , 'modelPk':request.modelPk});
         console.log(self.requests);
         RiotControl.trigger('requests_changed', self.requests);
     });
@@ -74,10 +74,14 @@ function RequestStore() {
         }).done(function(data, textStatus, jqXHR) {
             console.log('request.do: Success')
             // Call any "success" function passed along with our xhr request
+            // TODO: This is not possible to shelve! Pass a riotcontrol function name (as below) instead.
             if ($.isFunction(request.done)){
-                console.log('request.do: call done()')
+                console.warn('This will break localstorage for requests!')
                 console.log(request.done)
                 request.done(data, textStatus, jqXHR);
+            }
+            if (typeof request.done === 'string' || myVar instanceof request.done){
+                RiotControl.trigger(request.done, data, textStatus, jqXHR, request);
             }
         }).always(function (data, textStatus, jqXHR) {
             console.log(data)
@@ -108,7 +112,10 @@ function RequestStore() {
             'url': url,
             'method': 'DELETE',
             'data': '',
-            'done':done
+            'done':done,
+            'modelPk':modelPk,
+            'modelName':modelName,
+            'appName':appName
         })
     });
 
@@ -119,7 +126,10 @@ function RequestStore() {
                 'url': url,
                 'method': 'PUT',
                 'data': modelData,
-                'done': done
+                'done': done,
+                'modelPk':modelPk,
+                'modelName':modelName,
+                'appName':appName
             }
         );
     });
