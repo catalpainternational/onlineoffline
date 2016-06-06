@@ -9,7 +9,7 @@ from .models import *
 from .forms import *
 
 class IndexView(TemplateView):
-    template_name = 'contactlist/index.html'
+    template_name = 'contactlist/serviceworker_test.html'
 
 
 class PersonViewSet(viewsets.ModelViewSet):
@@ -53,6 +53,20 @@ def persons(request):
     return returns
 
 def offline(request):
-    returns = render(request, 'contactlist/offline.html')
+    returns = render(request, 'contactlist/serviceworker_test.html',{
+        'persons':Person.serialize(),
+        'events':Event.serialize(),
+        'personevents':PersonEvent.serialize(),
+        'forms':{
+            'person_add':PersonForm,
+            'person_edit':PersonEditForm,
+            'personevent':PersonEventForm,
+            'event':EventForm
+        },
+        'hi':'Nope'
+    })
     returns['Service-Worker-Allowed'] = True
     return returns
+
+def serviceworker(request):
+    return render(request, "contactlist/service-worker.js", content_type="application/javascript")
