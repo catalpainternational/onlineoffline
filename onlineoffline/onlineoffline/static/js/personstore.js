@@ -104,7 +104,7 @@ function PersonStore(persons) {
             obj[n.name] = $(n).val();
         });
         var newPerson = JSON.stringify(obj);
-        
+
         RiotControl.trigger('model_update', newPerson, appName, modelName, item.id, 'person_edit_done');
 
     })
