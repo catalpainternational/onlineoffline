@@ -6,8 +6,7 @@
 
         <script>
             // Register the ServiceWorker
-            navigator.serviceWorker.register('/service_serviceworker.js', {
-              scope: '/'
+            navigator.serviceWorker.register('/service_serviceworker.js', {scope: '/'
             }).then(function(registration) {
               console.log('The service worker has been registered ', registration);
             });
@@ -25,11 +24,11 @@
                   console.log('[controllerchange][statechange] ' +
                     'A "statechange" has occured: ', this.state
                   );
-
+                  $('#service-worker-state').text(this.state)
                 // If the ServiceWorker becomes "activated", let the user know they can go offline!
                   if (this.state === 'activated') {
                     // Show the "You may now use offline" notification
-                    document.getElementById('offlineNotification')
+                    $('#service-workeroffline-notification').show()
 
                   }
                 }
@@ -47,6 +46,7 @@
         <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
         <script src="{% static 'js/Lawnchair.js' %}"></script>
         <script src="{% static 'js/adapters/indexed-db.js' %}"></script>
+        <script src="{% static 'js/get_csrftoken.js' %}"></script>
         <!--<script src="{% static 'js/ajaxsubmit.js' %}"></script>-->
 
         <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
@@ -55,6 +55,8 @@
     <body>
         <div class='container'>
             <div class='row'>
+                <p>SERVICE WORKER STATE is: <span id="service-worker-state"></span></p>
+                <p id='service-workeroffline-notification'>You can now go offline - Service worker successfully activated</p>
                     <person></person>
                     <event></event>
                     <personevent></personevent>

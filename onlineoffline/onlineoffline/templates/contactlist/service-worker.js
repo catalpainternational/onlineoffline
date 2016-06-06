@@ -9,7 +9,7 @@
 
   CACHE_NAME = 'dependencies-cache';
 
-  REQUIRED_FILES = ["/service_service-worker.js", "{% static 'js/riot_compiler.min.js' %}", "{% static 'js/riotcontrol.js' %}", "{% static 'js/personstore.js' %}", "{% static 'js/requeststore.js' %}", "{% static 'js/jquery-2.1.4.min.js' %}", "{% static 'js/Lawnchair.js' %}", "{% static 'js/adapters/indexed-db.js' %}", "{% static 'css/bootstrap.min.css' %}"];
+  REQUIRED_FILES = ["/contactlist/offline/", "/service_serviceworker.js", "{% static 'js/riot_compiler.min.js' %}", "{% static 'js/riotcontrol.js' %}", "{% static 'js/personstore.js' %}", "{% static 'js/requeststore.js' %}", "{% static 'js/jquery-2.1.4.min.js' %}", "{% static 'js/Lawnchair.js' %}", "{% static 'js/adapters/indexed-db.js' %}", "{% static 'css/bootstrap.min.css' %}", "{% static 'js/get_csrftoken.js' %}"];
 
   self.addEventListener('install', function(event) {
     event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {

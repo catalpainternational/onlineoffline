@@ -39,8 +39,19 @@ function RequestStore() {
         self.trigger('requests_changed', self.requests)
     });
 
+    self.on('request_remove', function(e){
+        console.log(e)
+        console.log(self.requests)
+        for(var i = self.requests.length-1; i >= 0; i--){
+            if(self.requests[i] = e.item){
+                self.requests.splice(i,1);
+            self.trigger('requests_changed', self.requests)
+            }
+        }
+    });
+
     self.on('request_add', function (request) {
-        self.requests.push({'url':request.url, 'method':request.method, 'data':request.data, 'status':'waiting', 'done':request.done, 'appName':request.appName, 'modelName':request.modelName , 'modelPk':request.modelPk});
+        self.requests.push({'url':request.url, 'method':request.method, 'data':request.data, 'status':0, 'done':request.done, 'appName':request.appName, 'modelName':request.modelName , 'modelPk':request.modelPk});
         console.log(self.requests);
         RiotControl.trigger('requests_changed', self.requests);
     });
@@ -48,18 +59,16 @@ function RequestStore() {
     self.on('request_update', function (item, xhr) {
         console.log(item);
         console.log(xhr);
-        item.status = xhr.status;
+        item.status = parseInt(xhr.status);
         self.trigger('requests_changed', self.requests)
     });
 
     self.on('request_do', function(request) {
 
         headers = {
-            'Accept': 'application/json; q=1.0, */*'
+            'Accept': 'application/json; q=1.0, */*',
+            'X-CSRFToken': getCsrftoken()
         };
-        if (request.csrftoken !== undefined){
-            headers['X-CSRFToken'] = request.csrftoken
-        }
 
         var xhr = $.ajax({
             url: request.url,

@@ -3,7 +3,8 @@
 ###
 CACHE_NAME = 'dependencies-cache'
 REQUIRED_FILES = [
-        "/service_service-worker.js",
+        "/contactlist/offline/",
+        "/service_serviceworker.js",
         "{% static 'js/riot_compiler.min.js' %}"
         "{% static 'js/riotcontrol.js' %}"
         "{% static 'js/personstore.js' %}"
@@ -12,6 +13,8 @@ REQUIRED_FILES = [
         "{% static 'js/Lawnchair.js' %}"
         "{% static 'js/adapters/indexed-db.js' %}"
         "{% static 'css/bootstrap.min.css' %}"
+        "{% static 'js/get_csrftoken.js' %}"
+
 ]
 
 self.addEventListener 'install', (event) ->
