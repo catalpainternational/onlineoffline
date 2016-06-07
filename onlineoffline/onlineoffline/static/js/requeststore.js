@@ -40,8 +40,6 @@ function RequestStore() {
     });
 
     self.on('request_remove', function(e){
-        console.log(e)
-        console.log(self.requests)
         for(var i = self.requests.length-1; i >= 0; i--){
             if(self.requests[i] = e.item){
                 self.requests.splice(i,1);
@@ -52,13 +50,10 @@ function RequestStore() {
 
     self.on('request_add', function (request) {
         self.requests.push({'url':request.url, 'method':request.method, 'data':request.data, 'status':0, 'done':request.done, 'appName':request.appName, 'modelName':request.modelName , 'modelPk':request.modelPk});
-        console.log(self.requests);
         RiotControl.trigger('requests_changed', self.requests);
     });
 
     self.on('request_update', function (item, xhr) {
-        console.log(item);
-        console.log(xhr);
         item.status = parseInt(xhr.status);
         self.trigger('requests_changed', self.requests)
     });
@@ -81,7 +76,6 @@ function RequestStore() {
                 'X-CSRFToken': request.csrftoken
             }
         }).done(function(data, textStatus, jqXHR) {
-            console.log('request.do: Success')
             // Call any "success" function passed along with our xhr request
             // TODO: This is not possible to shelve! Pass a riotcontrol function name (as below) instead.
             if ($.isFunction(request.done)){
@@ -89,17 +83,15 @@ function RequestStore() {
                 console.log(request.done)
                 request.done(data, textStatus, jqXHR);
             }
+
             if (typeof request.done === 'string' || myVar instanceof request.done){
                 RiotControl.trigger(request.done, data, textStatus, jqXHR, request);
             }
         }).always(function (data, textStatus, jqXHR) {
-            console.log(data)
-            console.log(textStatus)
-            console.log(jqXHR)
             RiotControl.trigger('request_update', request, jqXHR);
             RiotControl.trigger('requests_changed',self.requests);
         }).fail(function(jqXHR, textStatus, errorThrown ){
-            console.log('Fail')
+
             alert('Fail')
         })
     });

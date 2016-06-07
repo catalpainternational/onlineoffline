@@ -6,7 +6,7 @@
 
         <script>
             // Register the ServiceWorker
-            navigator.serviceWorker.register('/service_serviceworker.js', {scope: '/'
+            navigator.serviceWorker.register('/service_serviceworker.js', {scope: '.'
             }).then(function(registration) {
               console.log('The service worker has been registered ', registration);
             });

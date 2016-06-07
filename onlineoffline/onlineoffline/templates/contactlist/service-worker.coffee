@@ -14,35 +14,25 @@ REQUIRED_FILES = [
         "{% static 'js/adapters/indexed-db.js' %}"
         "{% static 'css/bootstrap.min.css' %}"
         "{% static 'js/get_csrftoken.js' %}"
-
 ]
 
 self.addEventListener 'install', (event) ->
   # Perform install step:  loading each required file into cache
   event.waitUntil caches.open(CACHE_NAME).then((cache) ->
-    # Add all offline dependencies to the cache
-    console.log '[install] Caches opened, adding all core components' + 'to cache'
     cache.addAll REQUIRED_FILES
   ).then(->
-    console.log '[install] All required resources have been cached, ' + 'we\'re good!'
+    #  console.log '[install] All required resources have been cached, ' + 'we\'re good!'
     self.skipWaiting()
   )
   return
 self.addEventListener 'fetch', (event) ->
+  #  Respond from the cache if the file is there, else look for the server
   event.respondWith caches.match(event.request).then((response) ->
-    # Cache hit - return the response from the cached version
-    if response
-      console.log '[fetch] Returning from ServiceWorker cache: ', event.request.url
-      return response
-    # Not in cache - return the result from the live server
-    # `fetch` is essentially a "fallback"
-    console.log '[fetch] Returning from server: ', event.request.url
-    fetch event.request
+    return response if response #  console.log '[fetch] Returning from ServiceWorker cache: ', event.request.url
+    fetch event.request #  Not in cache - fallback to 'fetch' the result from the live server
   )
   return
 self.addEventListener 'activate', (event) ->
-  console.log '[activate] Activating ServiceWorker!'
-  # Calling claim() to force a "controllerchange" event on navigator.serviceWorker
-  console.log '[activate] Claiming this ServiceWorker!'
+  #  Calling claim() to force a "controllerchange" event on navigator.serviceWorker
   event.waitUntil self.clients.claim()
   return

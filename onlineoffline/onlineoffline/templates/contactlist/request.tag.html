@@ -73,36 +73,15 @@
     var self = this
     self.message = 'Requests'
 
-    self.on('mount', function() {
-        RiotControl.trigger('requests_init')
-        self.update()
-    });
+    self.on('mount', function() { RiotControl.trigger('requests_init'); self.update() });
 
-    RiotControl.on('requests_changed', function(requests) {
-        self.requests = requests
-        console.log(self.requests)
-        self.update()
-    })
+    RiotControl.on('requests_changed', function(requests) { self.requests = requests; self.update() })
 
-    RiotControl.on('request_add',function(){
-        console.log(self.requests);
-        self.update()
-    })
+    RiotControl.on('request_add',function(){ self.update() })
 
-    request_do(e){
-        console.log(e)
-        console.log(e.item)
-        RiotControl.trigger('request_do', e.item)}
+    request_do(e){ RiotControl.trigger('request_do', e.item) }
 
-    request_remove(e){
-        console.log(e.item)
-        RiotControl.trigger('request_remove', e.item)}
-
-
-    RiotControl.on('request_add',function(){
-        console.log(self.requests);
-        self.update()
-    })
+    request_remove(e){ RiotControl.trigger('request_remove', e.item) }
 
     shelve_requests(e){RiotControl.trigger('shelve_requests')}
 
