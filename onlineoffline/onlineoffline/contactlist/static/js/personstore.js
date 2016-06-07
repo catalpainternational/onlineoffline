@@ -20,20 +20,34 @@
     self.persons = persons || [];
     self.edit = {};
     self.on('persons_reload_from_server_done', function(data, textStatus, jqXHR) {
-      self.persons = data.results;
-      self.trigger('persons_changed', self.persons);
+      console.log(jqXHR);
+      if (jqXHR.status === 200) {
+        self.persons = data.results;
+        self.trigger('persons_changed', self.persons);
+        return RiotControl.trigger('shelve_persons');
+      } else {
+        return alert('Unexpected error getting list from server');
+      }
+    });
+
+    /* On failure to GET persons, get them from LocalStorage */
+    self.on('persons_reload_from_server_fail', function(request, jqXHR, textStatus, errorThrown) {
+      console.log('[PersonStore.persons_reload_from_server_fail] Persons could not be loaded from server - fallback to local');
+      RiotControl.trigger('unshelve_persons');
+      return self.trigger('persons_changed', self.persons);
     });
 
     /* Request the latest person list from DRF */
     self.on('reload_from_server', function() {
       var request;
       request = {
-        'url': "/" + appName + "/api/" + modelName + "/?format=json",
+        'url': "/" + appName + "/api/" + modelName + "/",
         'method': 'GET',
         'data': '',
         'status': 0,
         'done': 'persons_reload_from_server_done',
-        'action': 'immediate'
+        'action': 'immediate',
+        'fail': 'persons_reload_from_server_fail'
       };
       return RiotControl.trigger('request_add', request);
     });

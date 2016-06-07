@@ -5,9 +5,10 @@
     {{ request.items }}
     <div class="col col-lg-6">
         <h3>{ message } <label class='badge'>{ requests.length }</label></h3>
-        <button onclick={ shelve_requests } class="btn btn-sm btn-primary">To Local</button>
-        <button onclick={ unshelve_requests } class="btn btn-sm btn-primary">From Local</button>
-        <button onclick={ status_toggle } class="btn btn-sm btn-primary">{ online_status }</button>
+        <p>
+        <label each={item,i in RequestByStatus} class='badge'>{ i } {ok: item == 200, created: item == 201, deleted: item == 204, bad-request: item >= 400 && item < 500, internal-server-error: item > 500, waiting: item == 'undefined' } </label>
+       </p>
+
 
         <div class="panel panel-default">
             <div class="panel-body">
@@ -19,6 +20,21 @@
             </div>
         </div>
 
+        <h5>Show / Hide request types</h5>
+        <p>
+            <button onclick={ showAllRequests } class="btn btn-xs btn-primary">showAllRequests</button>
+            <button onclick={ hideSuccessfulRequests } class="btn btn-xs btn-primary">hideSuccessfulRequests</button>
+            <button onclick={ hideBadRequests } class="btn btn-xs btn-primary">hideBadRequests</button>
+        </p>
+        <h5>Request Management examples</h5>
+        <p>
+            <button onclick={ shelve_requests } class="btn btn-xs btn-primary">To Local</button>
+            <button onclick={ unshelve_requests } class="btn btn-xs btn-primary">From Local</button>
+            <button onclick={ status_toggle } class="btn btn-xs btn-primary">{ online_status }</button>
+            <button onclick={ clearSuccessfulRequests } class="btn btn-xs btn-primary">clearSuccessfulRequests</button>
+            <button onclick={ doAllRequests } class="btn btn-xs btn-primary">doAllRequests</button>
+        </p>
+
 
         <table class="table table-condensed table-bordered">
 
@@ -26,7 +42,7 @@
                 <tr><th>url</th><th>method</th><th>data</th><th>status</th><th>actions</th></tr>
             </thead>
             <tbody>
-                <tr class="request" each={ requests }>
+                <tr class="request {hidden: hidden}" each={ requests }>
                     <td>{ url }</td>
                     <td>{ method }</td>
                     <td>{ data }</td>
@@ -74,6 +90,19 @@
     var self = this
     self.message = 'Requests'
     self.online_status="online"
+    self.RequestByStatus = {}
+
+    updateRequestByStatus(){
+        var r = {};
+        for (i = 0, len = self.requests.length; i < len; i++) {
+            request = self.requests[i];
+            var status = request.status || 'undefined';
+            if (i == void 0){i = 'undefined'}
+            if (r[status] !== void 0){r[status]  = r[status] + 1}
+            if (r[status] == void 0){r[status] = 1}
+            }
+        self.RequestByStatus = r
+    }
 
     self.on('mount', function() {
         RiotControl.trigger('unshelve_requests');
@@ -100,7 +129,9 @@
             }
           }
         };
-    self.update()
+    self.updateRequestByStatus();
+    self.update();
+
 
     })
 
@@ -113,6 +144,62 @@
     })
 
     RiotControl.on('request_add',function(){ self.update() })
+
+    clearRequests(start, end){
+      var i,s;
+      i = self.requests.length - 1;
+      while (i >= 0) {
+        s = self.requests[i].status
+        if (s > (start-1) &&  s < end) {
+          self.requests.splice(i, 1);
+        }
+        i--;
+      }
+    }
+
+   hideRequests(start, end){
+      var i,s;
+      i = self.requests.length - 1;
+      while (i >= 0) {
+        s = self.requests[i].status
+        if (s > (start-1) &&  s < end) {
+          self.requests[i].hidden = true
+        }
+        i--;
+      }
+    }
+
+   showRequests(start, end){
+      var i,s;
+      i = self.requests.length - 1;
+      while (i >= 0) {
+        s = self.requests[i].status
+        if (s > (start-1) &&  s < end) {
+          self.requests[i].hidden = false
+        }
+        i--;
+      }
+    }
+
+    clearSuccessfulRequests(){self.clearRequests(200, 300)}
+    clearBadRequests(){self.clearRequests(400, 500)}
+
+    hideSuccessfulRequests(){self.hideRequests(200, 300)}
+    hideBadRequests(){self.hideRequests(400, 500)}
+
+    showAllRequests(){self.showRequests(0, 1000)}
+
+    doAllRequests(){
+      var i,s;
+      i = self.requests.length - 1;
+      while (i >= 0) {
+        request = self.requests[i]
+        if ((ref = request.status) !== 200 && ref !== 201 && ref !== 204) {
+          RiotControl.trigger('request_do', request)
+        }
+        i--;
+      }
+    }
 
     request_do(e){ RiotControl.trigger('request_do', e.item) }
 

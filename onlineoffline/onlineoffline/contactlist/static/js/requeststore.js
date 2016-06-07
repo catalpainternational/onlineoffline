@@ -39,21 +39,17 @@ RequestStore
       TODO: Make this work with Lawnchair not just localstorage
      */
     self.on('shelve_requests', function() {
-      localStorage.setItem('requests', JSON.stringify(self.requests));
-      return console.log('requests -> localstorage');
+      return localStorage.setItem('requests', JSON.stringify(self.requests));
     });
     self.on('unshelve_requests', function() {
       self.requests = JSON.parse(localStorage.getItem('requests')) || [];
-      RiotControl.trigger('requests_changed', self.requests);
-      return console.log('localstorage -> requests');
+      return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('requests_init', function() {
       self.trigger('requests_changed', self.requests);
     });
     self.on('request_remove', function(e) {
       var i;
-      console.log('[request] Request remove');
-      console.log(e.item);
       i = self.requests.length - 1;
       while (i >= 0) {
         if (self.requests[i] === e.item) {
@@ -61,9 +57,9 @@ RequestStore
         }
         i--;
       }
+      return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('request_add', function(request) {
-      console.log(request);
       self.requests.push({
         'url': request.url,
         'method': request.method,
@@ -73,13 +69,14 @@ RequestStore
         'appName': request.appName,
         'modelName': request.modelName,
         'modelPk': request.modelPk,
-        'action': request.action
+        'action': request.action,
+        'fail': request.fail || 'request_failed'
       });
-      RiotControl.trigger('requests_changed', self.requests);
+      return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('request_update', function(item, xhr) {
       item.status = parseInt(xhr.status);
-      self.trigger('requests_changed', self.requests);
+      return self.trigger('requests_changed', self.requests);
     });
 
     /* Attempt to send our request to the server */
@@ -102,7 +99,6 @@ RequestStore
       xhr.done(function(data, textStatus, jqXHR) {
         if ($.isFunction(request.done)) {
           console.error('This will break localstorage for requests!');
-          console.log(request.done);
           request.done(data, textStatus, jqXHR);
         }
         if (typeof request.done === 'string') {
@@ -116,7 +112,7 @@ RequestStore
         return RiotControl.trigger('requests_changed', self.requests);
       });
       return xhr.fail(function(jqXHR, textStatus, errorThrown) {
-        return RiotControl.trigger('request_failed', request, jqXHR, textStatus, errorThrown);
+        return RiotControl.trigger(request.fail, request, jqXHR, textStatus, errorThrown);
       });
     });
 

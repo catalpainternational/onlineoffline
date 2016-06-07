@@ -14,23 +14,34 @@ window.PersonStore = (persons) ->
   self.edit = {} # Store the Person currently being edited
 
   self.on 'persons_reload_from_server_done', (data, textStatus, jqXHR) ->
-    self.persons = data.results
+    console.log jqXHR
+    if jqXHR.status == 200
+      self.persons = data.results
+      self.trigger 'persons_changed', self.persons
+      RiotControl.trigger 'shelve_persons'
+    else
+      alert('Unexpected error getting list from server')
+
+  ### On failure to GET persons, get them from LocalStorage ###
+  self.on 'persons_reload_from_server_fail', (request, jqXHR, textStatus, errorThrown) ->
+    console.log ('[PersonStore.persons_reload_from_server_fail] Persons could not be loaded from server - fallback to local')
+    RiotControl.trigger 'unshelve_persons'
     self.trigger 'persons_changed', self.persons
-    return
+
 
 
   ### Request the latest person list from DRF ###
   self.on 'reload_from_server', ->
     request =
-      'url': "/#{ appName }/api/#{ modelName }/?format=json"
+      'url': "/#{ appName }/api/#{ modelName }/"
       'method': 'GET'
       'data': ''
       'status': 0
       'done': 'persons_reload_from_server_done'
       'action': 'immediate' # See RequestStore implementation: this indicates "do not cache me"
+      'fail': 'persons_reload_from_server_fail'
 
     RiotControl.trigger 'request_add', request
-
 
   ### Save the current state of persons to localStorage ###
   self.on 'shelve_persons', ->

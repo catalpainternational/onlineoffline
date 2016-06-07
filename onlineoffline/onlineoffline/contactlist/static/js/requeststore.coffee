@@ -34,28 +34,24 @@ window.RequestStore = ->
   ###
   self.on 'shelve_requests', ->
     localStorage.setItem 'requests', JSON.stringify(self.requests)
-    console.log 'requests -> localstorage'
 
   self.on 'unshelve_requests', ->
     self.requests = JSON.parse(localStorage.getItem('requests')) or []
     # Clear present items in the page
     RiotControl.trigger 'requests_changed', self.requests
-    console.log 'localstorage -> requests'
 
   self.on 'requests_init', ->
     self.trigger 'requests_changed', self.requests
     return
   self.on 'request_remove', (e) ->
-    console.log '[request] Request remove'
-    console.log e.item
     i = self.requests.length - 1
     while i >= 0
       if self.requests[i] == e.item
         self.requests.splice i, 1
       i--
-    return
+    RiotControl.trigger 'requests_changed', self.requests
+
   self.on 'request_add', (request) ->
-    console.log request
     self.requests.push
       'url': request.url
       'method': request.method
@@ -66,12 +62,12 @@ window.RequestStore = ->
       'modelName': request.modelName
       'modelPk': request.modelPk
       'action': request.action
+      'fail': request.fail || 'request_failed'
     RiotControl.trigger 'requests_changed', self.requests
-    return
+
   self.on 'request_update', (item, xhr) ->
     item.status = parseInt(xhr.status)
     self.trigger 'requests_changed', self.requests
-    return
 
   ### Attempt to send our request to the server ###
   self.on 'request_do', (request) ->
@@ -91,7 +87,7 @@ window.RequestStore = ->
       # Passing a function is not suitable for storage -use a named RiotControl function instead
       if $.isFunction(request.done)
          console.error  'This will break localstorage for requests!'
-         console.log request.done
+
          request.done data, textStatus, jqXHR
       if typeof request.done == 'string'
         RiotControl.trigger request.done, data, textStatus, jqXHR, request
@@ -102,7 +98,7 @@ window.RequestStore = ->
       RiotControl.trigger 'requests_changed', self.requests
 
     xhr.fail (jqXHR, textStatus, errorThrown) ->
-      RiotControl.trigger 'request_failed', request, jqXHR, textStatus, errorThrown
+      RiotControl.trigger request.fail, request, jqXHR, textStatus, errorThrown
 
 
   ### Adding a new model to the DRF ###
