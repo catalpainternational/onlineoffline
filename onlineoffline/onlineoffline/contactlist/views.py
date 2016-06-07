@@ -37,7 +37,7 @@ class PersonEventViewSet(viewsets.ModelViewSet):
 
 
 def persons(request):
-    returns = render(request, 'contactlist/index.html',{
+    returns = render(request, 'contactlist/index.html', {
         'persons':Person.serialize(),
         'events':Event.serialize(),
         'personevents':PersonEvent.serialize(),
@@ -53,7 +53,7 @@ def persons(request):
     return returns
 
 def offline(request):
-    returns = render(request, 'contactlist/serviceworker_test.html',{
+    returns = render(request, 'contactlist/offline.html', {
         'persons':Person.serialize(),
         'events':Event.serialize(),
         'personevents':PersonEvent.serialize(),
@@ -69,4 +69,4 @@ def offline(request):
     return returns
 
 def serviceworker(request):
-    return render(request, "contactlist/service-worker.js", content_type="application/javascript")
+    return render(request, "contactlist/service-worker-template", content_type="application/javascript")

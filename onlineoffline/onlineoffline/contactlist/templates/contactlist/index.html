@@ -3,17 +3,15 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="{% static 'js/riot+compiler.min.js' %}"></script>
+        {%  block serviceworker %}{%  endblock %}
+
+        <script src="{% static 'riot/riot+compiler.min.js' %}"></script>
         <script src="{% static 'js/riotcontrol.js' %}"></script>
         <script src="{% static 'js/personstore.js' %}"></script>
         <script src="{% static 'js/requeststore.js' %}"></script>
-        <!--script src="{% static 'js/bootstrap.min.js' %}"></script-->
-        <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
-        <script src="{% static 'js/Lawnchair.js' %}"></script>
-        <script src="{% static 'js/adapters/indexed-db.js' %}"></script>
-        <!--<script src="{% static 'js/ajaxsubmit.js' %}"></script>-->
-        <script src="{% static 'js/get_csrftoken.js' %}"></script>
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+        <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+
+        <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
 
     </head>
     <body>
@@ -45,21 +43,19 @@
 
 
         <script>
-            // initial persons can come from Django template tag
-            // var persons = {{ persons|safe }}
-            var persons = []
-            // Or they can be loaded with a call to RiotControl.trigger('reload_from_server')
-            var events = {{ events|safe }}
-            var personevents = {{ personevents|safe }}
-            var personStore = new PersonStore([])
-            var requestStore = new RequestStore()
+
+            var events = {{ events|safe }};
+            var personevents = {{ personevents|safe }};
+            var personStore = new PersonStore([]);
+            var requestStore = new RequestStore();
 
             // Register the store in central dispatch and mount.
-            RiotControl.addStore(personStore)
-            RiotControl.addStore(requestStore)
-            RiotControl.trigger('reload_from_server')
+            RiotControl.addStore(personStore);
+            RiotControl.addStore(requestStore);
+
             riot.mount('person');
             riot.mount('request');
+            RiotControl.trigger('reload_from_server'); // Trigger a GET request on page load to get all of the persons
 
         </script>
     </body>

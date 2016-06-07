@@ -7,6 +7,7 @@
         <h3>{ message } <label class='badge'>{ requests.length }</label></h3>
         <button onclick={ shelve_requests } class="btn btn-sm btn-primary">To Local</button>
         <button onclick={ unshelve_requests } class="btn btn-sm btn-primary">From Local</button>
+        <button onclick={ status_toggle } class="btn btn-sm btn-primary">{ online_status }</button>
 
         <div class="panel panel-default">
             <div class="panel-body">
@@ -29,10 +30,10 @@
                     <td>{ url }</td>
                     <td>{ method }</td>
                     <td>{ data }</td>
-                    <td class="http-status-code-{ok: status == 200, created: status == 201, bad-request: status >= 400 && status < 500, internal-server-error: status > 500 }"> { status }</td>
+                    <td class="http-status-code-{ok: status == 200, created: status == 201, deleted: status == 204, bad-request: status >= 400 && status < 500, internal-server-error: status > 500 }"> { status }</td>
                     <td>
-                        <button disabled="{disabled: status != 0 }" onclick={ parent.request_do } class="btn btn-sm btn-primary">Make request</button>
-                        <button disabled="{disabled: status != 0 }" onclick={ parent.request_remove } class="btn btn-sm btn-primary">Remove request</button>
+                        <button disabled="{disabled: status > 199 && status < 400 || online_status == 'offline' }" onclick={ parent.request_do } class="btn btn-sm btn-primary">Make request</button>
+                        <button onclick={ parent.request_remove } class="btn btn-sm btn-primary">Remove request</button>
 
                     </td>
                 </tr>
@@ -72,20 +73,59 @@
 
     var self = this
     self.message = 'Requests'
+    self.online_status="online"
 
-    self.on('mount', function() { RiotControl.trigger('requests_init'); self.update() });
+    self.on('mount', function() {
+        RiotControl.trigger('unshelve_requests');
 
-    RiotControl.on('requests_changed', function(requests) { self.requests = requests; self.update() })
+    });
+
+    RiotControl.on('requests_changed', function(requests) {
+        self.requests = requests;
+        console.log(requests)
+        // Attempt to request_do any requests which have not been responded to yet and have a parameter "action = immediate"
+        // This allows optional caching dependent on a request parameter
+
+         for (i = 0, len = requests.length; i < len; i++) {
+          request = requests[i];
+          if (request.action !== void 0 && request.action != "inprogress") {
+            if (((ref = request.status) !== 200 && ref !== 201 && ref !== 204) && request.action === 'immediate') {
+                console.log(request)
+                request.action = "inprogress"
+              RiotControl.trigger('request_do', request)
+            }
+            else if (self.online_status == 'online'  && request.action != "inprogress") {
+                request.action = "inprogress"
+                RiotControl.trigger('request_do', request)
+            }
+          }
+        };
+    self.update()
+
+    })
+
+    RiotControl.on('request_failed', function(request, jqXHR, textStatus, errorThrown){
+        request.status = jqXHR.status
+        self.update()
+        console.log(jqXHR)
+        console.log(textStatus)
+        console.log(errorThrown)
+    })
 
     RiotControl.on('request_add',function(){ self.update() })
 
     request_do(e){ RiotControl.trigger('request_do', e.item) }
 
-    request_remove(e){ RiotControl.trigger('request_remove', e.item) }
+    request_remove(e){ RiotControl.trigger('request_remove', e) }
 
     shelve_requests(e){RiotControl.trigger('shelve_requests')}
-
     unshelve_requests(e){RiotControl.trigger('unshelve_requests')}
+
+    status_toggle(e){
+        self.online_status = (self.online_status == 'online' ? 'offline' : 'online')
+    self.update()
+    }
+
 
 {#    </script>#}
 </request>

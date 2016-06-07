@@ -1,0 +1,38 @@
+{%  extends 'contactlist/index.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+
+{%  block serviceworker %}
+<script>
+    // Register the ServiceWorker
+    navigator.serviceWorker.register('/service_serviceworker.js', {scope: '.'
+    }).then(function(registration) {
+      console.log('The service worker has been registered ', registration);
+    });
+
+    // Listen for claiming of our ServiceWorker
+    navigator.serviceWorker.addEventListener('controllerchange', function(event) {
+      console.log(
+        '[controllerchange] A "controllerchange" event has happened ' +
+        'within navigator.serviceWorker: ', event
+      );
+
+      // Listen for changes in the state of our ServiceWorker
+      navigator.serviceWorker.controller.addEventListener('statechange',
+        function() {
+          console.log('[controllerchange][statechange] ' +
+            'A "statechange" has occured: ', this.state
+          );
+          $('#service-worker-state').text(this.state)
+        // If the ServiceWorker becomes "activated", let the user know they can go offline!
+          if (this.state === 'activated') {
+            // Show the "You may now use offline" notification
+            $('#service-workeroffline-notification').show()
+
+          }
+        }
+      );
+    });
+
+</script>
+{%  endblock %}

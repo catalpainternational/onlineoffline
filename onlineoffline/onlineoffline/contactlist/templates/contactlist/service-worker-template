@@ -1,0 +1,2 @@
+{% include "contactlist/service-worker.js" %}
+{# {% include "contactlist/service-worker-fetch.js" %} #}

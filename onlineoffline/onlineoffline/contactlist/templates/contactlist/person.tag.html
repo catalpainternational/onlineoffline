@@ -87,15 +87,12 @@
     RiotControl.on('persons_changed', function(persons) {
         self.person_edit_hide()
         self.persons = persons
-        console.log(self.persons)
         self.update()
     })
 
     edit_item(e) {
         self.person_edit_show()
-        console.log('edit')
         self.edit = e.item
-        console.log(e.item)
         $('li.person').removeClass('edit')
         $(e.target).parents('li.person:first').addClass('edit')
         self.update()
@@ -120,7 +117,6 @@
 
     remove(e) {
         e.preventDefault()
-        console.log(e)
         RiotControl.trigger('person_remove', e)
     }
 

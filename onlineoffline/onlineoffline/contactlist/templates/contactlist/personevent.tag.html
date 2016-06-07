@@ -31,14 +31,10 @@
   var self = this
 
   self.on('mount', function() {
-    console.log('personevent mount')
     RiotControl.trigger('personevent_init')
-    console.log('RiotControl.trigger("personevent_init")')
   })
 
   // Register a listener for store change personevents.
-
-  console.log("RiotControl.on('personevent_add', function(person...")
 
   RiotControl.on('personevent_add', function(persons) {
     self.personevents = personevents
@@ -47,7 +43,6 @@
 
   console.log(" submit(e) {")
   submit(e) {
-    console.log(' personevent_add')
     if (self.person) {
       RiotControl.trigger('personevent_add', { 'person': self.person })
     }
