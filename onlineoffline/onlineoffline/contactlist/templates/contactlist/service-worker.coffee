@@ -4,16 +4,15 @@
 CACHE_NAME = 'dependencies-cache'
 REQUIRED_FILES = [
 
-        "/contactlist/offline/",
-        "/service_serviceworker.js",
-        "{% static 'riot/riot+compiler.min.js' %}"
+        "/contactlist/offline/"
+        "/static/riot/riot+compiler.min.js"
+
         "{% static 'js/riotcontrol.js' %}"
         "{% static 'js/personstore.js' %}"
         "{% static 'js/requeststore.js' %}"
         "{% static 'jquery/dist/jquery.min.js' %}"
         "{% static 'lawnchair/src/Lawnchair.js' %}"
         "{% static 'lawnchair/src/adapters/indexed-db.js' %}"
-        "{% static 'js/get_csrftoken.js' %}"
         "{% static 'bootstrap/dist/css/bootstrap.min.css' %}"
 ]
 

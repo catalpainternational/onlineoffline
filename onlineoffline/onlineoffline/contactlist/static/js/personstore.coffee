@@ -4,7 +4,7 @@
 
 modelName = 'person'
 appName = 'contactlist'
-
+shelfName = "#{ appName }-#{ modelName }"
 
 window.PersonStore = (persons) ->
 
@@ -28,30 +28,17 @@ window.PersonStore = (persons) ->
       'status': 0
       'done': 'persons_reload_from_server_done'
       'action': 'immediate' # See RequestStore implementation: this indicates "do not cache me"
+
     RiotControl.trigger 'request_add', request
 
 
-  ### Save the current state of persons to 'Lawnchair' for offline storage ###
-  self.on 'save_to_local', ->
-    Lawnchair { name: 'persons' }, (store) ->
-      store.nuke()
-      # Clear all present items
-      for indexof of self.persons
-        p = self.persons[indexof]
-        store.save
-          key: p.id
-          data: p
+  ### Save the current state of persons to localStorage ###
+  self.on 'shelve_persons', ->
+    localStorage.setItem shelfName, JSON.stringify(self.persons)
 
-
-  ### Load the current state of persons saved in Lawnchair ###
-  self.on 'from_local', ->
-    self.persons = []
-    # Clear present items in the page
-    Lawnchair(name: 'persons').all (store) ->
-      for indexof of store
-        self.persons.push store[indexof].data
-      self.trigger 'persons_changed', self.persons
-
+  ### Load the current state of persons saved in localStorage ###
+  self.on 'unshelve_persons', ->
+    self.persons = JSON.parse(localStorage.getItem(shelfName)) or []
 
   self.on 'person_init', ->
     self.trigger 'persons_changed', self.persons

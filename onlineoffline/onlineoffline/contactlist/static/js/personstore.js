@@ -5,11 +5,13 @@
  */
 
 (function() {
-  var appName, modelName;
+  var appName, modelName, shelfName;
 
   modelName = 'person';
 
   appName = 'contactlist';
+
+  shelfName = appName + "-" + modelName;
 
   window.PersonStore = function(persons) {
     var self;
@@ -36,37 +38,14 @@
       return RiotControl.trigger('request_add', request);
     });
 
-    /* Save the current state of persons to 'Lawnchair' for offline storage */
-    self.on('save_to_local', function() {
-      return Lawnchair({
-        name: 'persons'
-      }, function(store) {
-        var indexof, p, results;
-        store.nuke();
-        results = [];
-        for (indexof in self.persons) {
-          p = self.persons[indexof];
-          results.push(store.save({
-            key: p.id,
-            data: p
-          }));
-        }
-        return results;
-      });
+    /* Save the current state of persons to localStorage */
+    self.on('shelve_persons', function() {
+      return localStorage.setItem(shelfName, JSON.stringify(self.persons));
     });
 
-    /* Load the current state of persons saved in Lawnchair */
-    self.on('from_local', function() {
-      self.persons = [];
-      return Lawnchair({
-        name: 'persons'
-      }).all(function(store) {
-        var indexof;
-        for (indexof in store) {
-          self.persons.push(store[indexof].data);
-        }
-        return self.trigger('persons_changed', self.persons);
-      });
+    /* Load the current state of persons saved in localStorage */
+    self.on('unshelve_persons', function() {
+      return self.persons = JSON.parse(localStorage.getItem(shelfName)) || [];
     });
     self.on('person_init', function() {
       return self.trigger('persons_changed', self.persons);

@@ -4,17 +4,16 @@
 <html>
     <head>
         {%  block serviceworker %}{%  endblock %}
-
-        <script src="{% static 'riot/riot+compiler.min.js' %}"></script>
+        <script src="/static/riot/riot+compiler.min.js"></script>
         <script src="{% static 'js/riotcontrol.js' %}"></script>
         <script src="{% static 'js/personstore.js' %}"></script>
         <script src="{% static 'js/requeststore.js' %}"></script>
         <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
-
         <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
 
     </head>
     <body>
+
         <div class='container'>
             <div class='row'>
                     <person></person>

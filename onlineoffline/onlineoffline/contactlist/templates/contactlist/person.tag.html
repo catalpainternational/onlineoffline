@@ -5,8 +5,8 @@
     <div class="col col-lg-6">
         <h3>{ message } <label class='badge'>{ persons.length }</label></h3>
         <button onclick={ reload_from_server } class="btn btn-sm btn-primary">From Server</button>
-        <button onclick={ requests } class="btn btn-sm btn-primary">To Local</button>
-        <button onclick={ from_local } class="btn btn-sm btn-primary">From Local</button>
+        <button onclick={ shelve_persons } class="btn btn-sm btn-primary">To Local</button>
+        <button onclick={ unshelve_persons } class="btn btn-sm btn-primary">From Local</button>
         <ul>
 
             <li id="info">
@@ -121,8 +121,8 @@
     }
 
     reload_from_server(e) {RiotControl.trigger('reload_from_server')}
-    save_to_local(e) {RiotControl.trigger('save_to_local')}
-    from_local(e) {RiotControl.trigger('from_local')}
+    shelve_persons(e) {RiotControl.trigger('shelve_persons')}
+    unshelve_persons(e) {RiotControl.trigger('unshelve_persons')}
 
     person_edit_hide() {self.edit = {};$(self.edit_person_panel).hide();$(self.add_person_panel).show()}
     person_edit_show() {$(self.edit_person_panel).show();$(self.add_person_panel).hide()}
