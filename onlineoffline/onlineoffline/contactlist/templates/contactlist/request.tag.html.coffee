@@ -72,7 +72,10 @@ self.clearRequests = ->
 self.showAllRequests = -> self.setPropertyByPropertyRange 'status', -1, -1, 'hidden'
 
 self.doAllRequests = ->
-  RiotControl.trigger 'request_do', request for request in requests if 200 < request.status <= 400
+  console.log('doAllRequests')
+  for request in self.requests
+    if not (200 < request.status <= 400)
+      RiotControl.trigger 'request_do', request
 
 self.request_do = (e) ->
   RiotControl.trigger 'request_do', e.item

@@ -97,15 +97,19 @@
   };
 
   self.doAllRequests = function() {
-    var i, len, ref, request, results;
-    if ((200 < (ref = request.status) && ref <= 400)) {
-      results = [];
-      for (i = 0, len = requests.length; i < len; i++) {
-        request = requests[i];
+    var i, len, ref, ref1, request, results;
+    console.log('doAllRequests');
+    ref = self.requests;
+    results = [];
+    for (i = 0, len = ref.length; i < len; i++) {
+      request = ref[i];
+      if (!((200 < (ref1 = request.status) && ref1 <= 400))) {
         results.push(RiotControl.trigger('request_do', request));
+      } else {
+        results.push(void 0);
       }
-      return results;
     }
+    return results;
   };
 
   self.request_do = function(e) {
