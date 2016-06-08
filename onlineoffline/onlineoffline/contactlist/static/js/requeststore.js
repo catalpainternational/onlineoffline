@@ -4,6 +4,16 @@
 RequestStore
   Provides a riotjs store to hold/inspect request information before it is passed to the server, and
   store results afterwards
+
+  Properties of a request:
+  url = URL to call
+  method = "GET", "POST", "PUT" or "DELETE"
+  data = JSON content for the request
+
+  The following jQuery promises can be passed (as RiotControl function names):
+  always = a RiotControl function name to call whatever happens
+  done = a RiotControl function name to call on success
+  fail = a RiotControl function name to call on failure
  */
 
 (function() {
@@ -35,6 +45,71 @@ RequestStore
       return getCookie('csrftoken');
     };
 
+    /* This is beautiful coffeescript */
+    Array.prototype.removing = function(fieldname, fieldvalue) {
+      var j, len, results, x;
+      results = [];
+      for (j = 0, len = this.length; j < len; j++) {
+        x = this[j];
+        if (!(x[fieldname] === fieldvalue)) {
+          results.push(x);
+        }
+      }
+      return results;
+    };
+
+    /* list.filterHighLow('status', 200, 400) -> new list where all items have 'status' property between 200 and 399 */
+    Array.prototype.filterByPropertyRange = function(propertyToRead, low, high) {
+      var j, len, ref, results, x;
+      results = [];
+      for (j = 0, len = this.length; j < len; j++) {
+        x = this[j];
+        if ((low <= (ref = x[propertyToRead]) && ref < high)) {
+          results.push(x);
+        }
+      }
+      return results;
+    };
+
+    /*
+      list.setPropertyByPropertyRange ('status', 200, 400, 'hidden') -> new list where if "status" is between 200 and 400, hidden = true
+      otherwise hidden is set to false
+     */
+    self.setPropertyByPropertyRange = function(propertyToRead, low, high, propertyToSet, inverse) {
+      var j, len, ref, ref1, ref2, x;
+      console.log(propertyToRead + ", " + low + "," + high + ", " + propertyToSet + ", " + inverse);
+      ref = self.requests;
+      for (j = 0, len = ref.length; j < len; j++) {
+        x = ref[j];
+        if (inverse === 'false') {
+          x[propertyToSet] = (low <= (ref1 = x[propertyToRead]) && ref1 < high) ? false : true;
+        } else {
+          x[propertyToSet] = (low <= (ref2 = x[propertyToRead]) && ref2 < high) ? true : false;
+        }
+      }
+      return false;
+    };
+
+    /*
+      filterByPropertyValue ('method', 'PUT', 'filter_by_method') -> set filter_by_method = true only if 'method' is 'PUT'
+     */
+    self.filterByPropertyValue = function(propertyToRead, valueToTest, propertyToSet, inverse) {
+      var j, len, ref, x;
+      ref = self.requests;
+      for (j = 0, len = ref.length; j < len; j++) {
+        x = ref[j];
+        if (inverse === 'false') {
+          x[propertyToSet] = x[propertyToRead] === valueToTest ? false : true;
+        } else {
+          x[propertyToSet] = x[propertyToRead] === valueToTest ? true : false;
+        }
+      }
+      return false;
+    };
+    self.on('ping', function() {
+      return console.log('ping');
+    });
+
     /* Shelve / unshelve requests to local storage to persist them through a browser restart
       TODO: Make this work with Lawnchair not just localstorage
      */
@@ -46,7 +121,7 @@ RequestStore
       return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('requests_init', function() {
-      self.trigger('requests_changed', self.requests);
+      return self.trigger('requests_changed', self.requests);
     });
     self.on('request_remove', function(e) {
       var i;
@@ -60,23 +135,74 @@ RequestStore
       return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('request_add', function(request) {
-      self.requests.push({
-        'url': request.url,
-        'method': request.method,
-        'data': request.data,
-        'status': request.status,
-        'done': request.done,
-        'appName': request.appName,
-        'modelName': request.modelName,
-        'modelPk': request.modelPk,
-        'action': request.action,
-        'fail': request.fail || 'request_failed'
-      });
+      request.fail = request.fail || 'request_failed';
+      request.status = request.status || 0;
+      if ($('#weAreLive').prop('checked')) {
+        request.action = 'immediate';
+      }
+      self.requests.push(request);
       return RiotControl.trigger('requests_changed', self.requests);
     });
     self.on('request_update', function(item, xhr) {
       item.status = parseInt(xhr.status);
       return self.trigger('requests_changed', self.requests);
+    });
+    self.on('updateRequestFiltering', function(filter_value) {
+      var j, k, len, len1, ref, ref1, request;
+      if (filter_value === 'all') {
+        ref = self.requests;
+        for (j = 0, len = ref.length; j < len; j++) {
+          request = ref[j];
+          request.hidden = false;
+        }
+      }
+      if (filter_value === 'waiting') {
+        ref1 = self.requests;
+        for (k = 0, len1 = ref1.length; k < len1; k++) {
+          request = ref1[k];
+          request.hidden = filter_value === 'waiting' && (request.status === void 0 || request.status === 0) ? false : true;
+        }
+      }
+      if (filter_value === 'success') {
+        self.setPropertyByPropertyRange('status', 200, 300, 'hidden', 'false');
+      }
+      if (filter_value === 'failed') {
+        self.setPropertyByPropertyRange('status', 400, 500, 'hidden', 'false');
+      }
+      if (filter_value === 'put') {
+        self.filterByPropertyValue('method', 'PUT', 'hidden', 'false');
+      }
+      if (filter_value === 'get') {
+        self.filterByPropertyValue('method', 'GET', 'hidden', 'false');
+      }
+      if (filter_value === 'post') {
+        self.filterByPropertyValue('method', 'POST', 'hidden', 'false');
+      }
+      if (filter_value === 'delete') {
+        return self.filterByPropertyValue('method', 'DELETE', 'hidden', 'false');
+      }
+    });
+    self.on('clearRequests', function(filter_value) {
+      console.log("clearRequests " + filter_value);
+      if (filter_value === 'success') {
+        self.requests.filterByPropertyRange('status', 200, 300);
+      }
+      if (filter_value === 'failed') {
+        self.requests.filterByPropertyRange('status', 400, 500);
+      }
+      if (filter_value === 'all') {
+        self.requests = [];
+      }
+      if (filter_value === 'get') {
+        self.requests = self.requests.removing('method', 'GET');
+      }
+      if (filter_value === 'post') {
+        self.requests = self.requests.removing('method', 'POST');
+      }
+      if (filter_value === 'delete') {
+        self.requests = self.requests.removing('method', 'DELETE');
+      }
+      return RiotControl.trigger('requests_changed', self.requests);
     });
 
     /* Attempt to send our request to the server */
@@ -97,22 +223,31 @@ RequestStore
 
       /* Always update our riotjs store instance with the response code */
       xhr.done(function(data, textStatus, jqXHR) {
+        var ref;
         if ($.isFunction(request.done)) {
           console.error('This will break localstorage for requests!');
           request.done(data, textStatus, jqXHR);
         }
         if (typeof request.done === 'string') {
-          return RiotControl.trigger(request.done, data, textStatus, jqXHR, request);
+          RiotControl.trigger(request.done, data, textStatus, jqXHR, request);
+        }
+        if (((200 <= (ref = jqXHR.status) && ref <= 400)) && request.method === 'GET') {
+          return console.log('test for remove: if ( 200 <= jqXHR.status <= 400 ) and request.method is "GET"');
         }
       });
 
       /* Always update our riotjs store instance with the response code */
       xhr.always(function(data, textStatus, jqXHR) {
         RiotControl.trigger('request_update', request, jqXHR);
-        return RiotControl.trigger('requests_changed', self.requests);
+        RiotControl.trigger('requests_changed', self.requests);
+        if (typeof request.always === 'string') {
+          return RiotControl.trigger(request.always, data, textStatus, jqXHR, request);
+        }
       });
       return xhr.fail(function(jqXHR, textStatus, errorThrown) {
-        return RiotControl.trigger(request.fail, request, jqXHR, textStatus, errorThrown);
+        if (typeof request.fail === 'string') {
+          return RiotControl.trigger(request.fail, request, jqXHR, textStatus, errorThrown);
+        }
       });
     });
 

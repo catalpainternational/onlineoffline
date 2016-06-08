@@ -2,13 +2,33 @@
 {% load crispy_forms_tags %}
 {#  Provides a RiotJS tag to view requests #}
 <request>
-    {{ request.items }}
+
     <div class="col col-lg-6">
         <h3>{ message } <label class='badge'>{ requests.length }</label></h3>
-        <p>
-        <label each={item,i in RequestByStatus} class='badge'>{ i } {ok: item == 200, created: item == 201, deleted: item == 204, bad-request: item >= 400 && item < 500, internal-server-error: item > 500, waiting: item == 'undefined' } </label>
-       </p>
+        <table class="table table-condensed">
+            <thead>
+                <tr><th>Code</th><th></th><th>Requests</th></tr>
+            </thead>
+            <tbody>
+                <tr each="{item,i in requestCounts.status}">
+                    <td>{ item }</td>
+                    <td>{ok: item == 200, created: item == 201, deleted: item == 204, bad-request: item >= 400 && item < 500, internal-server-error: item > 500, waiting: item == 'undefined' }</td>
+                    <td> <label class="badge">{i}</label></td>
+                </tr>
+            </tbody>
+        </table>
 
+        <table class="table table-condensed">
+            <thead>
+                <tr><th>Method</th><th>Requests</th></tr>
+            </thead>
+            <tbody>
+                <tr each="{item,i in requestCounts.method}">
+                    <td>{ item }</td>
+                    <td> <label class="badge">{i}</label></td>
+                </tr>
+            </tbody>
+        </table>
 
         <div class="panel panel-default">
             <div class="panel-body">
@@ -21,16 +41,52 @@
         </div>
 
         <h5>Show / Hide request types</h5>
-        <p>
-            <button onclick={ showAllRequests } class="btn btn-xs btn-primary">showAllRequests</button>
-            <button onclick={ hideSuccessfulRequests } class="btn btn-xs btn-primary">hideSuccessfulRequests</button>
-            <button onclick={ hideBadRequests } class="btn btn-xs btn-primary">hideBadRequests</button>
-        </p>
+
+
+        <label> Live ?
+            <input type="checkbox" id="weAreLive"/>
+        </label>
+
+        <label> Filtering
+            <select name="filtering" onchange="{updateFiltering}">
+                <optgroup label="Type">
+                    <option value='all' selected="{filtering == 'all'}">Show All</option>
+                    <option value='waiting' selected="{filtering == 'waiting'}">Show waiting</option>
+                    <option value='success' selected="{filtering == 'success'}">Show success</option>
+                    <option value='failed' selected="{filtering == 'failed'}">Show failed</option>
+                </optgroup>
+                <optgroup label="Method">
+                    <option value='get' selected="{filtering == 'get'}">GET</option>
+                    <option value='put' selected="{filtering == 'put'}">PUT</option>
+                    <option value='post' selected="{filtering == 'post'}">POST</option>
+                    <option value='delete' selected="{filtering == 'delete'}">DELETE</option>
+                </optgroup>
+            </select>
+        </label>
+
+       <label> Clearing
+            <select name="clearing" onchange="{clearRequests}">
+                <optgroup label="Type">
+                    <option value='all' selected="{filtering == 'all'}">Remove All</option>
+                    <option value='waiting' selected="{filtering == 'waiting'}" disabled="disabled">Remove waiting</option>
+                    <option value='success' selected="{filtering == 'success'}" disabled="disabled">Remove success</option>
+                    <option value='failed' selected="{filtering == 'failed'}" disabled="disabled">Remove failed</option>
+                </optgroup>
+                <optgroup label="Method">
+                    <option value='get' selected="{filtering == 'get'}">Remove GET</option>
+                    <option value='put' selected="{filtering == 'put'}">Remove PUT</option>
+                    <option value='post' selected="{filtering == 'post'}">Remove POST</option>
+                    <option value='delete' selected="{filtering == 'delete'}">Remove DELETE</option>
+                </optgroup>
+            </select>
+        </label>
+
+
         <h5>Request Management examples</h5>
+
         <p>
-            <button onclick={ shelve_requests } class="btn btn-xs btn-primary">To Local</button>
-            <button onclick={ unshelve_requests } class="btn btn-xs btn-primary">From Local</button>
-            <button onclick={ status_toggle } class="btn btn-xs btn-primary">{ online_status }</button>
+            <button onclick={ shelve_requests } class="btn btn-xs btn-primary">Cache</button>
+            <button onclick={ unshelve_requests } class="btn btn-xs btn-primary">Reload from Cache</button>
             <button onclick={ clearSuccessfulRequests } class="btn btn-xs btn-primary">clearSuccessfulRequests</button>
             <button onclick={ doAllRequests } class="btn btn-xs btn-primary">doAllRequests</button>
         </p>
@@ -86,133 +142,6 @@
     </style>
 
 {#    <script>#}
-
-    var self = this
-    self.message = 'Requests'
-    self.online_status="online"
-    self.RequestByStatus = {}
-
-    updateRequestByStatus(){
-        var r = {};
-        for (i = 0, len = self.requests.length; i < len; i++) {
-            request = self.requests[i];
-            var status = request.status || 'undefined';
-            if (i == void 0){i = 'undefined'}
-            if (r[status] !== void 0){r[status]  = r[status] + 1}
-            if (r[status] == void 0){r[status] = 1}
-            }
-        self.RequestByStatus = r
-    }
-
-    self.on('mount', function() {
-        RiotControl.trigger('unshelve_requests');
-
-    });
-
-    RiotControl.on('requests_changed', function(requests) {
-        self.requests = requests;
-        console.log(requests)
-        // Attempt to request_do any requests which have not been responded to yet and have a parameter "action = immediate"
-        // This allows optional caching dependent on a request parameter
-
-         for (i = 0, len = requests.length; i < len; i++) {
-          request = requests[i];
-          if (request.action !== void 0 && request.action != "inprogress") {
-            if (((ref = request.status) !== 200 && ref !== 201 && ref !== 204) && request.action === 'immediate') {
-                console.log(request)
-                request.action = "inprogress"
-              RiotControl.trigger('request_do', request)
-            }
-            else if (self.online_status == 'online'  && request.action != "inprogress") {
-                request.action = "inprogress"
-                RiotControl.trigger('request_do', request)
-            }
-          }
-        };
-    self.updateRequestByStatus();
-    self.update();
-
-
-    })
-
-    RiotControl.on('request_failed', function(request, jqXHR, textStatus, errorThrown){
-        request.status = jqXHR.status
-        self.update()
-        console.log(jqXHR)
-        console.log(textStatus)
-        console.log(errorThrown)
-    })
-
-    RiotControl.on('request_add',function(){ self.update() })
-
-    clearRequests(start, end){
-      var i,s;
-      i = self.requests.length - 1;
-      while (i >= 0) {
-        s = self.requests[i].status
-        if (s > (start-1) &&  s < end) {
-          self.requests.splice(i, 1);
-        }
-        i--;
-      }
-    }
-
-   hideRequests(start, end){
-      var i,s;
-      i = self.requests.length - 1;
-      while (i >= 0) {
-        s = self.requests[i].status
-        if (s > (start-1) &&  s < end) {
-          self.requests[i].hidden = true
-        }
-        i--;
-      }
-    }
-
-   showRequests(start, end){
-      var i,s;
-      i = self.requests.length - 1;
-      while (i >= 0) {
-        s = self.requests[i].status
-        if (s > (start-1) &&  s < end) {
-          self.requests[i].hidden = false
-        }
-        i--;
-      }
-    }
-
-    clearSuccessfulRequests(){self.clearRequests(200, 300)}
-    clearBadRequests(){self.clearRequests(400, 500)}
-
-    hideSuccessfulRequests(){self.hideRequests(200, 300)}
-    hideBadRequests(){self.hideRequests(400, 500)}
-
-    showAllRequests(){self.showRequests(0, 1000)}
-
-    doAllRequests(){
-      var i,s;
-      i = self.requests.length - 1;
-      while (i >= 0) {
-        request = self.requests[i]
-        if ((ref = request.status) !== 200 && ref !== 201 && ref !== 204) {
-          RiotControl.trigger('request_do', request)
-        }
-        i--;
-      }
-    }
-
-    request_do(e){ RiotControl.trigger('request_do', e.item) }
-
-    request_remove(e){ RiotControl.trigger('request_remove', e) }
-
-    shelve_requests(e){RiotControl.trigger('shelve_requests')}
-    unshelve_requests(e){RiotControl.trigger('unshelve_requests')}
-
-    status_toggle(e){
-        self.online_status = (self.online_status == 'online' ? 'offline' : 'online')
-    self.update()
-    }
-
-
+    {% include 'contactlist/request.tag.html.js' %}
 {#    </script>#}
 </request>
