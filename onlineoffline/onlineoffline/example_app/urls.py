@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from rest_framework import routers
 
-from example_app.views import IndexView, ExampleModelViewSet
+from .views import IndexView, ExampleModelViewSet
 
 router = routers.DefaultRouter()
 router.register(r'examplemodels', ExampleModelViewSet)

@@ -1,0 +1,50 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+<personevent>
+    <div class="col col-lg-4">
+
+    <h3>Person Events <label class='badge'>{ personevents.length }</label></h3>
+
+      <ul>
+        <li each={ personevents }>
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <p> { person }</p>
+              <p> { event }</p>
+              <p> { notice }</p>
+            </div>
+          </div>
+        </li>
+      </ul>
+{#      {% crispy forms.personevent %}#}
+    </div>
+
+  <style scoped>
+
+    :scope { font-size: 2rem }
+    h3 { color: #444 }
+    ul { font-size: 1rem }
+    li { list-style-type: none }
+  </style>
+
+  var self = this
+
+  self.on('mount', function() {
+    RiotControl.trigger('personevent_init')
+  })
+
+  // Register a listener for store change personevents.
+
+  RiotControl.on('personevent_add', function(persons) {
+    self.personevents = personevents
+    self.update()
+  })
+
+  console.log(" submit(e) {")
+  submit(e) {
+    if (self.person) {
+      RiotControl.trigger('personevent_add', { 'person': self.person })
+    }
+  }
+</personevent>

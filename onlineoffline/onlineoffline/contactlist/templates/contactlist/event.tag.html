@@ -1,0 +1,57 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+<event>
+<div class="col col-lg-4"
+
+  <h3>{ message } <label class='badge'>{ persons.length }</label></h3>
+
+  <ul>
+    <li each={ events }>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <h4> { name }</h4>
+          <p>E { description }</p>
+          <p>P { date }</p>
+        </div>
+      </div>
+    </li>
+  </ul>
+{#  {% crispy forms.event %}#}
+  <style scoped>
+
+    :scope { font-size: 2rem }
+    h3 { color: #444 }
+    ul { font-size: 1rem }
+    li { list-style-type: none }
+  </style>
+
+  var self = this
+  self.message = 'Events'
+  self.counter = 0
+  self.max_length = 256
+
+  self.on('mount', function() {
+    // Trigger init event when component is mounted to page.
+    // Any store could respond to this.
+    RiotControl.trigger('event_init')
+  })
+
+  // Register a listener for store change events.
+  RiotControl.on('event_changed', function(persons) {
+    self.events = events
+    self.update()
+  })
+
+  edit(e) {
+  }
+
+  add(e) {
+    if (self.text) {
+      // Trigger event to all stores registered in central dispatch.
+      // This allows loosely coupled stores/components to react to same events.
+      RiotControl.trigger('event_add', { 'event': self.name })
+      self.text = self.name.value = ''
+    }
+  }
+</event>
