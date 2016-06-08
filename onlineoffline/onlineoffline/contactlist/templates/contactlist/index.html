@@ -1,0 +1,61 @@
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html>
+    <head>
+        {%  block serviceworker %}{%  endblock %}
+        <script src="/static/riot/riot+compiler.min.js"></script>
+        <script src="{% static 'js/riotcontrol.js' %}"></script>
+        <script src="{% static 'js/personstore.js' %}"></script>
+        <script src="{% static 'js/requeststore.js' %}"></script>
+        <script src="{% static 'jquery/dist/jquery.min.js' %}"></script>
+        <link rel="stylesheet" href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}">
+
+    </head>
+    <body>
+
+        <div class='container'>
+            <div class='row'>
+                    <person></person>
+                    <event></event>
+                    <personevent></personevent>
+                    <request></request>
+            </div>
+
+        </div>
+
+        <script type="riot/tag">
+            {% include 'contactlist/person.tag.html' %}
+        </script>
+
+        <script type="riot/tag">
+            {% include 'contactlist/event.tag.html' %}
+        </script>
+
+        <script type="riot/tag">
+            {% include 'contactlist/personevent.tag.html' %}
+        </script>
+
+        <script type="riot/tag">
+            {% include 'contactlist/request.tag.html' %}
+        </script>
+
+
+        <script>
+
+            var events = {{ events|safe }};
+            var personevents = {{ personevents|safe }};
+            var personStore = new PersonStore([]);
+            var requestStore = new RequestStore();
+
+            // Register the store in central dispatch and mount.
+            RiotControl.addStore(personStore);
+            RiotControl.addStore(requestStore);
+
+            riot.mount('person');
+            riot.mount('request');
+            RiotControl.trigger('reload_from_server'); // Trigger a GET request on page load to get all of the persons
+
+        </script>
+    </body>
+</html>

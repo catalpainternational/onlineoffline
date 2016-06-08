@@ -5,16 +5,16 @@ from rest_framework import serializers
 class PersonModelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Person
-        fields = ('person','email','phone')
+        fields = ('id', 'person', 'email', 'phone')
 
 
 class EventModelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Event
-        fields = ('name','description','date')
+        fields = ('id', 'name', 'description', 'date')
 
 
 class PersonEventModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = PersonEvent
-        fields = ('event','person','notice')
+        fields = ('id', 'event', 'person', 'notice')

@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 
 from rest_framework import routers
 
-from .views import PersonViewSet, EventViewSet, PersonEventViewSet, IndexView, offline, persons
+from .views import PersonViewSet, EventViewSet, PersonEventViewSet, IndexView, offline, persons, serviceworker
 
 router = routers.DefaultRouter()
 router.register(r'person', PersonViewSet)

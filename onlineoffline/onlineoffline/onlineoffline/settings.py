@@ -44,11 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # 'django.contrib.gis',
-
+    'crispy_forms',
+    'django_extensions',
     # 3rd Party
     'rosetta',
-
+    
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],

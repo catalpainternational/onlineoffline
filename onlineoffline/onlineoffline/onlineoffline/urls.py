@@ -21,6 +21,7 @@ from django.contrib import admin
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     # url(r'^', include('example_app.urls')),
+    url(r'^service_', include('contactlist.serviceworker_urls'), name='serviceworker'),
     url(r'^contactlist/', include('contactlist.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),

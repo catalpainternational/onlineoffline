@@ -6,10 +6,10 @@ from rest_framework import viewsets
 
 from .serializers import *
 from .models import *
-
+from .forms import *
 
 class IndexView(TemplateView):
-    template_name = 'contactlist/index.html'
+    template_name = 'contactlist/serviceworker_test.html'
 
 
 class PersonViewSet(viewsets.ModelViewSet):
@@ -37,11 +37,36 @@ class PersonEventViewSet(viewsets.ModelViewSet):
 
 
 def persons(request):
-    returns = render(request, 'contactlist/index.html',{'persons':Person.serialize()})
+    returns = render(request, 'contactlist/index.html', {
+        'persons':Person.serialize(),
+        'events':Event.serialize(),
+        'personevents':PersonEvent.serialize(),
+        'forms':{
+            'person_add':PersonForm,
+            'person_edit':PersonEditForm,
+            'personevent':PersonEventForm,
+            'event':EventForm
+        },
+        'hi':'Nope'
+    })
     returns['Service-Worker-Allowed'] = True
     return returns
 
 def offline(request):
-    returns = render(request, 'contactlist/offline.html')
+    returns = render(request, 'contactlist/offline.html', {
+        'persons':Person.serialize(),
+        'events':Event.serialize(),
+        'personevents':PersonEvent.serialize(),
+        'forms':{
+            'person_add':PersonForm,
+            'person_edit':PersonEditForm,
+            'personevent':PersonEventForm,
+            'event':EventForm
+        },
+        'hi':'Nope'
+    })
     returns['Service-Worker-Allowed'] = True
     return returns
+
+def serviceworker(request):
+    return render(request, "contactlist/service-worker-template", content_type="application/javascript")
